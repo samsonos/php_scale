@@ -1,5 +1,5 @@
 <?php
-namespace samson\upload;
+namespace samson\scale;
 
 use samson\core\CompressableExternalModule;
 use samson\core\iModuleViewable;
@@ -29,15 +29,20 @@ class Scale extends CompressableExternalModule
 		if(file_exists($file))			
 		{
 			$file_type = pathinfo( $file, PATHINFO_EXTENSION );
+            $lowFileType = strtolower($file_type);
 
 			// Получим текущую фотографию
-			if (( $file_type == 'jpg' ) || ( $file_type == 'jpeg' ))
+			if (( $lowFileType == 'jpg' ) || ( $lowFileType == 'jpeg' ))
 			$img = imagecreatefromjpeg( $file );
-			elseif ( $file_type == 'png' )
+			elseif ( $lowFileType == 'png' )
 			$img = imagecreatefrompng( $file );
-			elseif ( $file_type == 'gif' )
+			elseif ( $lowFileType == 'gif' )
 			$img = imagecreatefromgif( $file );
 			else { trace( 'Не поддерживаемый формат изображения!');return false; }
+
+            if (!img) {
+                trace( 'Ошибка создания изображения!');return false;
+            }
 				
 			// Получим текущие размеры картинки
 			$sWidth = imagesx( $img );
@@ -102,15 +107,15 @@ class Scale extends CompressableExternalModule
 				$new_path = $folder_path.'/'.$filename;
 	
 				//Сохраним временную картинку в файл
-				if (( $file_type == 'jpg' ) || ( $file_type == 'jpeg' ))
+				if (( $lowFileType == 'jpg' ) || ( $lowFileType == 'jpeg' ))
 				{
 					imagejpeg( $new_img, $new_path, (isset($size['quality'])?$size['quality']:100) );
 				}
-				elseif ($file_type == 'png')
+				elseif ($lowFileType == 'png')
 				{
 					imagepng( $new_img, $new_path );
 				}
-				elseif ($file_type == 'gif')
+				elseif ($lowFileType == 'gif')
 				{
 					imagegif( $new_img, $new_path );
 				}
