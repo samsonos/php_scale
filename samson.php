@@ -40,7 +40,7 @@ class Scale extends CompressableExternalModule
 			$img = imagecreatefromgif( $file );
 			else { trace( 'Не поддерживаемый формат изображения!');return false; }
 
-            if (!img) {
+            if (!$img) {
                 trace( 'Ошибка создания изображения!');return false;
             }
 				
@@ -62,20 +62,25 @@ class Scale extends CompressableExternalModule
 				$tWidth = $size['width'];
 				// Получим соотношение сторон в коробке
 				$tRatio = $tHeight / $tWidth;
-				if ($size['fit']) $correlation = ($originRatio < $tRatio);
-				else $correlation = ($originRatio > $tRatio);
-				// Сравним соотношение сторон картинки и "целевой" коробки для определения
-				// по какой стороне будем уменьшать картинку
-				if ( $correlation)
-				{
-					$width = $tWidth;
-					$height = $width * $originRatio;
-				}
-				else
-				{
-					$height = $tHeight;
-					$width = $height / $originRatio;
-				}
+                if (($tHeight >= $sHeight)&&($tWidth >= $sWidth)) {
+                    $width = $sWidth;
+                    $height = $sHeight;
+                } else {
+                    if ($size['fit']) $correlation = ($originRatio < $tRatio);
+                    else $correlation = ($originRatio > $tRatio);
+                    // Сравним соотношение сторон картинки и "целевой" коробки для определения
+                    // по какой стороне будем уменьшать картинку
+                    if ( $correlation)
+                    {
+                        $width = $tWidth;
+                        $height = $width * $originRatio;
+                    }
+                    else
+                    {
+                        $height = $tHeight;
+                        $width = $height / $originRatio;
+                    }
+                }
 
 				// Зададим расмер превьюшки
 				$new_width = floor( $width );

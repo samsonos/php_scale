@@ -1,5 +1,5 @@
-ActiveRecord # SamsonPHP 
+scale # SamsonPHP 
 
-Basic ORM module
+Module for creating thumbnails
 
-egorov@samsonos.com
+samsonos.com
