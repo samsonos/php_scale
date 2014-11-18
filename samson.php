@@ -22,7 +22,7 @@ class Scale extends CompressableExternalModule
 	public function resize($file, $filename, $upload_dir = NULL)
 	{
         // Путь к папке с загрузками
-        if(!isset($upload_dir))$upload_dir = \samson\upload\Upload::UPLOAD_PATH;
+        if(!isset($upload_dir))$upload_dir = 'upload/';
         //trace($upload_dir);
         //trace($file);
 			
