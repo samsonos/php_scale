@@ -19,13 +19,8 @@ class Scale extends CompressableExternalModule
 
 	public $thumnails_sizes = array('mini'=>array('width'=>208, 'height'=>190, 'fit'=>true, 'quality'=>100));
 	
-	public function resize($file, $filename, $upload_dir = NULL)
+	public function resize($file, $filename, $upload_dir = 'upload/')
 	{
-        // Путь к папке с загрузками
-        if(!isset($upload_dir))$upload_dir = 'upload/';
-        //trace($upload_dir);
-        //trace($file);
-			
 		if(file_exists($file))			
 		{
 			$file_type = pathinfo( $file, PATHINFO_EXTENSION );
