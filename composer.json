@@ -1,1 +1,20 @@
-{"name":"samsonos/php_scale","author":"Vitaly Iegorov <egorov@samsonos.com>","version":"0.0.1","require":{}}
+{
+    "name":"samsonos/php_scale",
+    "description": "SamsonPHP scaling module",
+    "keywords": [ "scale", "samsonphp"],
+    "authors":[
+        {
+            "name":"Vitaly Iegorov",
+            "email":"egorov@samsonos.com"
+        }
+    ],
+    "require":{
+        "samsonos/php_core":"*",
+        "samsonos/php_fs":"*",
+    },
+    "license":"Open Software License (OSL) v 3.0",
+    "homepage":"http://samsonphp.com/",
+    "autoload" : {
+        "files": ["global.php"]
+    }
+}

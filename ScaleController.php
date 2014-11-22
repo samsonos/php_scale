@@ -5,60 +5,64 @@ use samson\core\CompressableExternalModule;
 use samson\core\iModuleViewable;
 
 /**
- * Интерфейс для подключения модуля в ядро фреймворка SamsonPHP
+ * Scale module controller
  *
  * @package SamsonPHP
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
  * @author Nikita Kotenko <nick.w2r@gmail.com>
- * @version 0.1
  */
-class Scale extends CompressableExternalModule
+class ScaleController extends CompressableExternalModule
 {
-    /** Идентификатор модуля */
+    /** @var string Identifier */
     protected $id = 'scale';
 
-    public $thumnails_sizes = array('mini'=>array('width'=>208, 'height'=>190, 'fit'=>true, 'quality'=>100));
+    /** @var \samson\fs\FileSystemController Pointer to file system module */
+    protected $fs;
 
-    /** @var \samson\fs\iAdapter  */
-    public $adapter;
+    /** @var array Generic sizes collection */
+    public $thumnails_sizes = array(
+        'mini' => array(
+            'width'=>208,
+            'height'=>190,
+            'fit'=>true,
+            'quality'=>100)
+    );
 
     /**
-     * Initialize module
-     * @param array $params Collection of module parameters
-     * @return bool True if module successfully initialized
+     * Module initialization
+     * @param array $params Collection of parameters
+     * @return bool|void
      */
     public function init(array $params = array())
     {
-        if (!isset($this->adapter)) {
-            $this->adapter = new \samson\fs\LocalAdapter();
-
-        }
-
-        // Call parent initialization
-        parent::init($params);
+        // Store pointer to file system module
+        $this->fs = & m('fs');
     }
 
+    /**
+     * Perform resource scaling
+     * @param string $file
+     * @param string $filename
+     * @param string $upload_dir
+     * @return bool True is scalling completed without errors
+     */
     public function resize($file, $filename, $upload_dir = 'upload')
     {
-        if($this->adapter->exists($file))
-        {
-            $file = $this->adapter->read($file, $filename);
+        // Check if file exists
+        if ($this->fs->exists($file)) {
+            // Read file data
+            $file = $this->fs->read($file, $filename);
+            // Get file extension
             $file_type = pathinfo($file, PATHINFO_EXTENSION );
-            $lowFileType = strtolower($file_type);
 
-            // Получим текущую фотографию
-            if (( $lowFileType == 'jpg' ) || ( $lowFileType == 'jpeg' ))
-                $img = imagecreatefromjpeg( $file );
-            elseif ( $lowFileType == 'png' )
-                $img = imagecreatefrompng( $file );
-            elseif ( $lowFileType == 'gif' )
-                $img = imagecreatefromgif( $file );
-            else {
-                trace('Не поддерживаемый формат изображения!');return false;
-            }
-
-            if (!$img) {
-                trace( 'Ошибка создания изображения!');return false;
+            // Create image handle
+            $img = null;
+            switch (strtolower($file_type)) {
+                case 'jpg':
+                case 'jpeg': $img = imagecreatefromjpeg($file); break;
+                case 'png': $img = imagecreatefrompng( $file ); break;
+                case 'gif': $img = imagecreatefromgif( $file ); break;
+                default: return e('Не поддерживаемый формат изображения[##]!', E_SAMSON_CORE_ERROR, $filename);
             }
 
             // Получим текущие размеры картинки
@@ -68,9 +72,8 @@ class Scale extends CompressableExternalModule
             // Получим соотношение сторон картинки
             $originRatio = $sHeight / $sWidth;
 
-
-            foreach ($this->thumnails_sizes as $folder=>$size)
-            {
+            // Iterate all configured scaling sizes
+            foreach ($this->thumnails_sizes as $folder=>$size) {
                 //trace($folder);
                 $folder_path = $upload_dir.'/'.$folder;
                 if(!file_exists($folder_path))  mkdir( $folder_path, 0775, true );
@@ -87,13 +90,10 @@ class Scale extends CompressableExternalModule
                     else $correlation = ($originRatio > $tRatio);
                     // Сравним соотношение сторон картинки и "целевой" коробки для определения
                     // по какой стороне будем уменьшать картинку
-                    if ( $correlation)
-                    {
+                    if ( $correlation) {
                         $width = $tWidth;
                         $height = $width * $originRatio;
-                    }
-                    else
-                    {
+                    } else {
                         $height = $tHeight;
                         $width = $height / $originRatio;
                     }
@@ -128,25 +128,22 @@ class Scale extends CompressableExternalModule
                 // Получим полный путь к превьюхе
                 $new_path = $folder_path.'/'.$filename;
 
-                //Сохраним временную картинку в файл
-                if (( $lowFileType == 'jpg' ) || ($lowFileType == 'jpeg' ))
-                {
-                    imagejpeg($new_img, $new_path, (isset($size['quality'])?$size['quality']:100));
+                // Create image handle
+                switch (strtolower($file_type)) {
+                    case 'jpg':
+                    case 'jpeg': imagejpeg($new_img, $new_path, (isset($size['quality'])?$size['quality']:100)); break;
+                    case 'png': imagepng($new_img, $new_path); break;
+                    case 'gif': imagegif($new_img, $new_path); break;
+                    default: return e('Не поддерживаемый формат изображения[##]!', E_SAMSON_CORE_ERROR, $filename);
                 }
-                elseif ($lowFileType == 'png')
-                {
-                    imagepng($new_img, $new_path);
-                }
-                elseif ($lowFileType == 'gif')
-                {
-                    imagegif($new_img, $new_path);
-                }
-                else return false;
 
-                $this->adapter->copy($new_path, $filename, $folder_path);
+                // Copy scaled resource
+                $this->fs->copy($new_path, $filename, $folder_path);
             }
+
             return true;
         }
+
         return false;
     }
 
