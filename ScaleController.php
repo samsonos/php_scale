@@ -37,6 +37,9 @@ class ScaleController extends CompressableExternalModule
     {
         // Store pointer to file system module
         $this->fs = & m('fs');
+
+        // Call parent initialization
+        parent::init($params);
     }
 
     /**
