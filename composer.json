@@ -10,11 +10,8 @@
     ],
     "require":{
         "samsonos/php_core":"*",
-        "samsonos/php_fs":"*",
+        "samsonos/php_fs":"*"
     },
     "license":"Open Software License (OSL) v 3.0",
-    "homepage":"http://samsonphp.com/",
-    "autoload" : {
-        "files": ["global.php"]
-    }
+    "homepage":"http://samsonphp.com/"
 }
