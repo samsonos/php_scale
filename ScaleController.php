@@ -53,20 +53,11 @@ class ScaleController extends CompressableExternalModule
     {
         // Check if file exists
         if ($this->fs->exists($file)) {
-            // Read file data
-            $file = $this->fs->read($file, $filename);
             // Get file extension
-            $file_type = pathinfo($file, PATHINFO_EXTENSION );
+            $fileExtension = $this->fs->extension($file);
 
-            // Create image handle
-            $img = null;
-            switch (strtolower($file_type)) {
-                case 'jpg':
-                case 'jpeg': $img = imagecreatefromjpeg($file); break;
-                case 'png': $img = imagecreatefrompng( $file ); break;
-                case 'gif': $img = imagecreatefromgif( $file ); break;
-                default: return e('Не поддерживаемый формат изображения[##]!', E_SAMSON_CORE_ERROR, $filename);
-            }
+            // Read file data and create image handle
+            $img = imagecreatefromstring($this->fs->read($file, $filename));
 
             // Получим текущие размеры картинки
             $sWidth = imagesx( $img );
@@ -109,12 +100,12 @@ class ScaleController extends CompressableExternalModule
                 // Создадим временный файл
                 $new_img = imagecreateTRUEcolor( $new_width, $new_height );
 
-                if($file_type=="png") {
+                if ($fileExtension == "png") {
                     imagealphablending($new_img, false);
                     $colorTransparent = imagecolorallocatealpha($new_img, 0, 0, 0, 127);
                     imagefill($new_img, 0, 0, $colorTransparent);
                     imagesavealpha($new_img, true);
-                } elseif($file_type=="gif") {
+                } elseif($fileExtension == "gif") {
                     $trnprt_indx = imagecolortransparent($img);
                     if ($trnprt_indx >= 0) {
                         //its transparent
@@ -132,7 +123,7 @@ class ScaleController extends CompressableExternalModule
                 $new_path = $folder_path.'/'.$filename;
 
                 // Create image handle
-                switch (strtolower($file_type)) {
+                switch (strtolower($fileExtension)) {
                     case 'jpg':
                     case 'jpeg': imagejpeg($new_img, $new_path, (isset($size['quality'])?$size['quality']:100)); break;
                     case 'png': imagepng($new_img, $new_path); break;
@@ -141,7 +132,7 @@ class ScaleController extends CompressableExternalModule
                 }
 
                 // Copy scaled resource
-                $this->fs->copy($new_path, $filename, $folder_path);
+                $this->fs->move($new_path, $filename, $folder_path);
             }
 
             return true;
