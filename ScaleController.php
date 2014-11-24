@@ -16,7 +16,7 @@ class ScaleController extends CompressableExternalModule
     /** @var string Identifier */
     protected $id = 'scale';
 
-    /** @var \samson\fs\FileSystemController Pointer to file system module */
+    /** @var \samson\fs\FileService Pointer to file system module */
     protected $fs;
 
     /** @var array Generic sizes collection */
@@ -122,17 +122,23 @@ class ScaleController extends CompressableExternalModule
                 // Получим полный путь к превьюхе
                 $new_path = $folder_path.'/'.$filename;
 
+                ob_start();
                 // Create image handle
                 switch (strtolower($fileExtension)) {
                     case 'jpg':
-                    case 'jpeg': imagejpeg($new_img, $new_path, (isset($size['quality'])?$size['quality']:100)); break;
-                    case 'png': imagepng($new_img, $new_path); break;
-                    case 'gif': imagegif($new_img, $new_path); break;
+                    case 'jpeg': imagejpeg($new_img, null, (isset($size['quality'])?$size['quality']:100)); break;
+                    case 'png': imagepng($new_img, null); break;
+                    case 'gif': imagegif($new_img); break;
                     default: return e('Не поддерживаемый формат изображения[##]!', E_SAMSON_CORE_ERROR, $filename);
                 }
 
+                $final_image = ob_get_contents();
+
+                ob_end_clean();
+                imagedestroy($new_img);
+
                 // Copy scaled resource
-                $this->fs->move($new_path, $filename, $folder_path);
+                $this->fs->write($final_image, $filename, $folder_path);
             }
 
             return true;
