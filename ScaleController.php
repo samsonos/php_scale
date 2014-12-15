@@ -70,7 +70,8 @@ class ScaleController extends CompressableExternalModule
             foreach ($this->thumnails_sizes as $folder=>$size) {
                 //trace($folder);
                 $folder_path = $upload_dir.'/'.$folder;
-                if(!file_exists($folder_path))  mkdir( $folder_path, 0775, true );
+
+                $this->fs->mkDir($folder_path);
 
                 $tHeight = $size['height'];
                 $tWidth = $size['width'];
