@@ -122,6 +122,8 @@ class ScaleController extends CompressableExternalModule
 
 	            if (isset($size['crop']) && is_array($size['crop'])) {
 		            $crop = & $size['crop'];
+		            $cropWidth = $size['width'];
+		            $cropHeight = $size['height'];
 		            $x = 0;
 		            $y = 0;
 		            if ($crop['x'] == 'center') {
@@ -134,8 +136,16 @@ class ScaleController extends CompressableExternalModule
 		            } elseif ($crop['y'] == 'bottom') {
 			            $y = floor($new_height - $size['height']);
 		            }
+		            if ($size['width'] >= $new_width) {
+			            $cropWidth = $new_width;
+			            $x = 0;
+		            }
+		            if ($size['height'] >= $new_height) {
+			            $cropHeight = $new_height;
+			            $y = 0;
+		            }
 
-		            $to_crop_array = array('x' =>$x , 'y' => $y, 'width' => $size['width'], 'height'=> $size['height']);
+		            $to_crop_array = array('x' =>$x , 'y' => $y, 'width' => $cropWidth, 'height'=> $cropHeight);
 		            $thumb_im = imagecrop($new_img, $to_crop_array);
 		            $new_img = $thumb_im;
 	            }
