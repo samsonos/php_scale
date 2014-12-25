@@ -118,7 +118,27 @@ class ScaleController extends CompressableExternalModule
                 }
 
                 // Скопируем, изменив размер
-                imagecopyresampled ( $new_img, $img, 0, 0, 0, 0, $new_width, $new_height, $sWidth, $sHeight );
+                imagecopyresampled($new_img, $img, 0, 0, 0, 0, $new_width, $new_height, $sWidth, $sHeight);
+
+	            if (isset($size['crop']) && is_array($size['crop'])) {
+		            $crop = & $size['crop'];
+		            $x = 0;
+		            $y = 0;
+		            if ($crop['x'] == 'center') {
+			            $x = floor(($new_width - $size['width'])/2);
+		            } elseif ($crop['x'] == 'right') {
+			            $x = floor($new_width - $size['width']);
+		            }
+		            if ($crop['y'] == 'middle') {
+			            $y = floor(($new_height - $size['height'])/2);
+		            } elseif ($crop['y'] == 'bottom') {
+			            $y = floor($new_height - $size['height']);
+		            }
+
+		            $to_crop_array = array('x' =>$x , 'y' => $y, 'width' => $size['width'], 'height'=> $size['height']);
+		            $thumb_im = imagecrop($new_img, $to_crop_array);
+		            $new_img = $thumb_im;
+	            }
 
                 // Получим полный путь к превьюхе
                 $new_path = $folder_path.'/'.$filename;
