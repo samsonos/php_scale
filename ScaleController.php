@@ -51,6 +51,11 @@ class ScaleController extends CompressableExternalModule
      */
     public function resize($file, $filename, $upload_dir = 'upload')
     {
+    	 // TODO: FIX IT!!!!!!!!
+        if(!$this->fs->exists($file)) {
+            $file = $upload_dir.'/'.$filename;
+        }
+        
         // Check if file exists
         if ($this->fs->exists($file)) {
             // Get file extension
