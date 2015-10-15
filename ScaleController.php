@@ -151,8 +151,15 @@ class ScaleController extends CompressableExternalModule
 		            }
 
 		            $to_crop_array = array('x' =>$x , 'y' => $y, 'width' => $cropWidth, 'height'=> $cropHeight);
-		            $thumb_im = imagecrop($new_img, $to_crop_array);
-		            $new_img = $thumb_im;
+                            
+                            // If system function exists then use it else use custom analog
+	                    if (function_exists('imagecrop')) {
+	
+	                        $new_img = imagecrop($img, $to_crop_array);
+	                    } else {
+	
+	                        $new_img = $this->customCrop($img, $to_crop_array);
+	                    }
 	            }
 
                 // Получим полный путь к превьюхе
@@ -182,5 +189,21 @@ class ScaleController extends CompressableExternalModule
 
         return false;
     }
+    
+    function customCrop($src, $cropArray)
+    {
+        $thumb_im = imagecreatetruecolor($cropArray['width'], $cropArray['height']);
+        imagecopy(
+            $thumb_im,
+            $src,
+            0,
+            0,
+            $cropArray['x'],
+            $cropArray['y'],
+            $cropArray['width'],
+            $cropArray['height']
+        );
 
+        return $thumb_im;
+    }
 }
